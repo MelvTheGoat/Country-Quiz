@@ -5,6 +5,7 @@
  */
 import { COUNTRIES, countriesIn, resolvePool } from './countries.js';
 import { createRng, randomSeed, shuffle, sample } from './random.js';
+import { ALL_QUESTIONS } from './protocol.js';
 
 export const DIRECTIONS = {
   COUNTRY_TO_CAPITAL: 'country-to-capital',
@@ -87,6 +88,23 @@ function buildQuestion(answer, index, pool, direction, rng) {
 }
 
 /**
+ * How many questions a setting actually produces. `ALL_QUESTIONS` means one per
+ * country in the chosen set; a number is capped at the pool, since a quiz never
+ * repeats a country.
+ */
+export function questionCountFor(selection, questionCount) {
+  const poolSize = resolvePool(selection).length;
+  if (questionCount === ALL_QUESTIONS) return poolSize;
+  return Math.min(Number(questionCount) || 0, poolSize);
+}
+
+/** Label for the setting: "All 54" or just "15". */
+export function describeQuestionCount(selection, questionCount) {
+  const total = questionCountFor(selection, questionCount);
+  return questionCount === ALL_QUESTIONS ? `All ${total}` : String(total);
+}
+
+/**
  * Build a full quiz. Never repeats a country inside one quiz, so the question
  * count is capped at the size of the pool.
  */
@@ -102,7 +120,7 @@ export function buildQuiz({
   }
 
   const rng = createRng(seed);
-  const total = Math.min(count, pool.length);
+  const total = questionCountFor(selection, count);
   const answers = sample(pool, total, rng);
 
   return {

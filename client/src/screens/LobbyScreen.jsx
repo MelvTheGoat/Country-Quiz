@@ -2,6 +2,7 @@ import { useState } from 'react';
 import {
   DIRECTION_LABELS,
   ROOM_STATUS,
+  describeQuestionCount,
   describeSelection,
 } from '@capitals-quiz/shared';
 import { shareText } from '../lib/share.js';
@@ -73,7 +74,9 @@ export function LobbyScreen({ room, me, opponent, onToggleReady, onLeave }) {
           </li>
           <li>
             <span>Questions</span>
-            <strong>{room.settings.questionCount}</strong>
+            <strong>
+              {describeQuestionCount(room.settings.selection, room.settings.questionCount)}
+            </strong>
           </li>
           <li>
             <span>Per question</span>
