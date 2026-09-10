@@ -1,0 +1,19 @@
+# One service that serves both the API/sockets and the built front end.
+# Render can pick this up directly (New + → Blueprint), or you can copy the two
+# commands into a manually created Web Service.
+services:
+  - type: web
+    name: capitals-quiz
+    runtime: node
+    plan: free
+    # Vite is a devDependency and Render sets NODE_ENV=production, which makes a
+    # plain `npm install` skip devDependencies — hence --include=dev, without
+    # which the build fails with "vite: not found".
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm start
+    # Rooms are held in memory, so this must stay at a single instance:
+    # two instances means two players can land on different servers.
+    numInstances: 1
+    envVars:
+      - key: NODE_VERSION
+        value: '22'

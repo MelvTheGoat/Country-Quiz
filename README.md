@@ -147,13 +147,17 @@ three Pacific islands as distractors.
 If `client/dist` exists, the Express server serves the built front end itself, so
 a single host (Render, Fly.io, Railway…) gives you a working link:
 
-- **Build Command:** `npm install && npm run build`
+- **Build Command:** `npm install --include=dev && npm run build`
 - **Start Command:** `npm start`
 - No environment variables needed. With `VITE_SERVER_URL` unset, the client
   connects back to its own origin — which is the same service.
 
-Without the build step you get an API-only server, and `/` answers
-`Cannot GET /`. That is the signal that `npm run build` didn't run.
+`--include=dev` is not optional on hosts that set `NODE_ENV=production` (Render
+does): npm then skips devDependencies, Vite isn't installed, and the build dies
+with `vite: not found`. `render.yaml` in the repo root has this baked in.
+
+Without a build step you get an API-only server and `/` answers `Cannot GET /` —
+that is the signal that `npm run build` never ran.
 
 ### Option B — split front end and back end
 
