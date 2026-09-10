@@ -1,0 +1,19 @@
+{
+  "name": "@capitals-quiz/shared",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Country dataset and pure game logic shared by the Capitals Quiz client and server.",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./data/countries.json": "./data/countries.json"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "files": [
+    "src",
+    "data"
+  ]
+}
