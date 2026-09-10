@@ -1,4 +1,7 @@
 import http from 'node:http';
+import { existsSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import express from 'express';
 import cors from 'cors';
 import { Server } from 'socket.io';
@@ -33,6 +36,26 @@ app.get('/api/rooms/:code', (req, res) => {
     settings: room.settings,
   });
 });
+
+/**
+ * Single-service mode: if the front end has been built, serve it from here too,
+ * so one deploy gives one URL and the client connects back to its own origin.
+ * Deploying the two halves separately still works — this block is simply skipped
+ * when there is no build to serve.
+ */
+const clientDist = path.resolve(fileURLToPath(new URL('../../client/dist', import.meta.url)));
+if (existsSync(path.join(clientDist, 'index.html'))) {
+  app.use(express.static(clientDist));
+
+  // Unknown /api paths stay JSON 404s rather than quietly returning the app.
+  app.use('/api', (_req, res) => res.status(404).json({ ok: false, error: 'Unknown endpoint' }));
+
+  // Everything else is the single-page app.
+  app.get('*', (_req, res) => res.sendFile(path.join(clientDist, 'index.html')));
+  console.log(`Serving the front end from ${clientDist}`);
+} else {
+  console.log('No client build found — running as an API-only server.');
+}
 
 const server = http.createServer(app);
 const io = new Server(server, {

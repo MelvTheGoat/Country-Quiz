@@ -142,24 +142,35 @@ three Pacific islands as distractors.
 
 ## Deployment
 
-The two halves deploy independently.
+### Option A — one service, one URL (simplest)
 
-**Backend** (Render, Fly.io, Railway…):
+If `client/dist` exists, the Express server serves the built front end itself, so
+a single host (Render, Fly.io, Railway…) gives you a working link:
 
-- Build: `npm install`
-- Start: `npm start`
-- Set `CLIENT_ORIGIN` to your front-end URL (comma-separate several).
-- Rooms are in memory, so run a **single instance** — or add a shared store
-  before scaling out.
+- **Build Command:** `npm install && npm run build`
+- **Start Command:** `npm start`
+- No environment variables needed. With `VITE_SERVER_URL` unset, the client
+  connects back to its own origin — which is the same service.
 
-**Frontend** (Vercel, Netlify, Cloudflare Pages…):
+Without the build step you get an API-only server, and `/` answers
+`Cannot GET /`. That is the signal that `npm run build` didn't run.
 
-- Build: `npm install && npm run build`
-- Output directory: `client/dist`
-- Set `VITE_SERVER_URL` to the deployed backend URL.
+### Option B — split front end and back end
 
-If you'd rather run one service, serve `client/dist` from the Express app; with
-`VITE_SERVER_URL` unset, the client connects back to its own origin.
+- **Backend** (Render/Fly/Railway): build `npm install`, start `npm start`, and
+  set `CLIENT_ORIGIN` to your front-end URL (comma-separate several).
+- **Frontend** (Vercel/Netlify/Cloudflare Pages): build `npm run build`, output
+  directory `client/dist`, and set `VITE_SERVER_URL` to the backend URL.
+
+`VITE_SERVER_URL` is inlined at build time, so changing it needs a redeploy, not
+just a restart.
+
+### Either way
+
+Rooms live in memory, so run a **single instance** — with two, players can land
+on different servers and never see each other. Free tiers that sleep when idle
+will make the first visit slow to wake, and a match started at that moment can
+feel laggy.
 
 Copy `server/.env.example` and `client/.env.example` to `.env` to configure
 either side locally.
