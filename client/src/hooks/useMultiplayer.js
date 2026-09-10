@@ -1,8 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { EVENTS, ROOM_STATUS } from '@capitals-quiz/shared';
 import { emitWithAck, getSocket } from '../lib/socket.js';
+import { STORAGE_KEYS, readStored, writeStored } from '../lib/storage.js';
 
 const emptyMatch = { question: null, reveal: null, summary: null, paused: null, lockedAnswer: null };
+
+/**
+ * The seat (room code + player id) is persisted, not just held in memory: a
+ * refresh mid-match otherwise loses the room code and the player is left to
+ * forfeit while the server holds their place open.
+ */
+const rememberSeat = (seat) => writeStored(STORAGE_KEYS.seat, seat);
+const forgetSeat = () => writeStored(STORAGE_KEYS.seat, null);
 
 /**
  * All multiplayer socket state in one place: screens below only see plain data
@@ -15,7 +24,9 @@ export function useMultiplayer(profile) {
   const [notice, setNotice] = useState(null);
 
   /** Kept in a ref so the reconnect handler always sees the current seat. */
-  const seatRef = useRef(null);
+  const seatRef = useRef(readStored(STORAGE_KEYS.seat, null));
+  /** A seat restored from storage may be long stale — fail it quietly. */
+  const restoredSeatRef = useRef(Boolean(seatRef.current));
 
   useEffect(() => {
     const socket = getSocket();
@@ -26,10 +37,17 @@ export function useMultiplayer(profile) {
       if (seatRef.current) {
         socket.emit(EVENTS.ROOM_REJOIN, seatRef.current, (response) => {
           if (!response?.ok) {
+            const wasRestored = restoredSeatRef.current;
             seatRef.current = null;
+            restoredSeatRef.current = false;
+            forgetSeat();
             setRoom(null);
             setMatch(emptyMatch);
-            setNotice(response?.error || 'That room is no longer available.');
+            if (!wasRestored) {
+              setNotice(response?.error || 'That room is no longer available.');
+            }
+          } else {
+            restoredSeatRef.current = false;
           }
         });
       }
@@ -59,6 +77,7 @@ export function useMultiplayer(profile) {
     const onResumed = () => setMatch((prev) => ({ ...prev, paused: null }));
     const onClosed = ({ reason }) => {
       seatRef.current = null;
+      forgetSeat();
       setRoom(null);
       setMatch(emptyMatch);
       setNotice(reason === 'expired' ? 'That room expired.' : 'The room was closed.');
@@ -101,6 +120,7 @@ export function useMultiplayer(profile) {
       const response = await emitWithAck(EVENTS.ROOM_CREATE, { ...identity(), settings });
       if (response.ok) {
         seatRef.current = { code: response.code, playerId: response.playerId };
+        rememberSeat(seatRef.current);
         setRoom(response.room);
         setMatch(emptyMatch);
         setNotice(null);
@@ -115,6 +135,7 @@ export function useMultiplayer(profile) {
       const response = await emitWithAck(EVENTS.ROOM_JOIN, { ...identity(), code });
       if (response.ok) {
         seatRef.current = { code: response.code, playerId: response.playerId };
+        rememberSeat(seatRef.current);
         setRoom(response.room);
         setMatch(emptyMatch);
         setNotice(null);
@@ -140,6 +161,7 @@ export function useMultiplayer(profile) {
   const leaveRoom = useCallback(() => {
     getSocket().emit(EVENTS.ROOM_LEAVE);
     seatRef.current = null;
+    forgetSeat();
     setRoom(null);
     setMatch(emptyMatch);
   }, []);

@@ -6,6 +6,7 @@ const KEYS = {
   name: 'capitals-quiz:name',
   avatar: 'capitals-quiz:avatar',
   playerId: 'capitals-quiz:player-id',
+  seat: 'capitals-quiz:seat',
   theme: 'capitals-quiz:theme',
   sound: 'capitals-quiz:sound',
   best: 'capitals-quiz:best-scores',
