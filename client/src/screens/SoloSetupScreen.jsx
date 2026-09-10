@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { describeSelection, selectionError } from '@capitals-quiz/shared';
+import { describeSelection, questionCountFor, selectionError } from '@capitals-quiz/shared';
 import { QuizSetup } from '../components/QuizSetup.jsx';
 
 export const SOLO_DEFAULTS = {
@@ -24,7 +24,8 @@ export function SoloSetupScreen({ initialSettings = SOLO_DEFAULTS, onStart }) {
           disabled={Boolean(error)}
           onClick={() => onStart(settings)}
         >
-          Start {settings.questionCount} questions · {describeSelection(settings.selection)}
+          Start {questionCountFor(settings.selection, settings.questionCount)} questions ·{' '}
+          {describeSelection(settings.selection)}
         </button>
       </div>
     </div>

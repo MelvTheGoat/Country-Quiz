@@ -1,4 +1,5 @@
 import {
+  ALL_QUESTIONS,
   CONTINENTS,
   COUNTRIES,
   DIRECTIONS,
@@ -6,6 +7,7 @@ import {
   QUESTION_COUNTS,
   TIME_LIMITS,
   countriesIn,
+  questionCountFor,
   selectionError,
 } from '@capitals-quiz/shared';
 import { CountryPicker } from './CountryPicker.jsx';
@@ -117,10 +119,16 @@ export function QuizSetup({ settings, onChange, showMatchOptions = false }) {
               aria-pressed={settings.questionCount === count}
               onClick={() => patch({ questionCount: count })}
             >
-              {count}
+              {count === ALL_QUESTIONS ? 'All' : count}
             </button>
           ))}
         </div>
+        {settings.questionCount === ALL_QUESTIONS && !error && (
+          <p className="hint">
+            Every country in this set — {questionCountFor(selection, ALL_QUESTIONS)} questions, no
+            repeats.
+          </p>
+        )}
       </fieldset>
 
       {showMatchOptions && (

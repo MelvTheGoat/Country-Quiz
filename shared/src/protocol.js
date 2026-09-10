@@ -32,8 +32,11 @@ export const ROOM_STATUS = {
   FINISHED: 'finished',
 };
 
-export const QUESTION_COUNTS = [10, 15, 20];
-export const TIME_LIMITS = [10, 15, 20, 30];
+/** Sentinel question count: ask about every country in the chosen set. */
+export const ALL_QUESTIONS = 'all';
+
+export const QUESTION_COUNTS = [10, 15, 20, ALL_QUESTIONS];
+export const TIME_LIMITS = [5, 10, 15, 20, 30];
 
 export const DEFAULT_SETTINGS = {
   selection: { type: 'continent', continent: 'Europe' },

@@ -4,7 +4,7 @@
  */
 import { CONTINENTS, resolvePool } from './countries.js';
 import { DIRECTIONS, MIN_CUSTOM_COUNTRIES } from './quiz.js';
-import { QUESTION_COUNTS, TIME_LIMITS, DEFAULT_SETTINGS } from './protocol.js';
+import { ALL_QUESTIONS, QUESTION_COUNTS, TIME_LIMITS, DEFAULT_SETTINGS } from './protocol.js';
 
 export const MAX_NAME_LENGTH = 16;
 
@@ -44,9 +44,12 @@ export function normalizeSettings(input = {}) {
   const error = selectionError(settings.selection);
   if (error) return { error };
 
-  const questionCount = QUESTION_COUNTS.includes(Number(settings.questionCount))
-    ? Number(settings.questionCount)
-    : DEFAULT_SETTINGS.questionCount;
+  const questionCount =
+    settings.questionCount === ALL_QUESTIONS
+      ? ALL_QUESTIONS
+      : QUESTION_COUNTS.includes(Number(settings.questionCount))
+        ? Number(settings.questionCount)
+        : DEFAULT_SETTINGS.questionCount;
   const timeLimitSeconds = TIME_LIMITS.includes(Number(settings.timeLimitSeconds))
     ? Number(settings.timeLimitSeconds)
     : DEFAULT_SETTINGS.timeLimitSeconds;

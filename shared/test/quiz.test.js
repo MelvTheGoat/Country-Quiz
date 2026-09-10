@@ -1,12 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  ALL_QUESTIONS,
   COUNTRIES,
   CONTINENTS,
   DIRECTIONS,
   MIN_CUSTOM_COUNTRIES,
+  QUESTION_COUNTS,
+  TIME_LIMITS,
   buildQuiz,
   countriesIn,
+  describeQuestionCount,
+  normalizeSettings,
+  questionCountFor,
   isValidRoomCode,
   generateRoomCode,
   normalizeRoomCode,
@@ -85,6 +91,41 @@ test('the quiz count is capped at the size of the pool', () => {
     seed: 3,
   });
   assert.equal(quiz.questions.length, 5);
+});
+
+test('"all" asks about every country in the set, exactly once', () => {
+  const quiz = buildQuiz({
+    selection: { type: 'continent', continent: 'Oceania' },
+    count: ALL_QUESTIONS,
+    seed: 21,
+  });
+  const pool = countriesIn('Oceania');
+  assert.equal(quiz.questions.length, pool.length);
+  assert.deepEqual(
+    quiz.questions.map((q) => q.answerCode).sort(),
+    pool.map((c) => c.code).sort(),
+  );
+  assert.equal(questionCountFor({ type: 'continent', continent: 'Africa' }, ALL_QUESTIONS), 54);
+  assert.equal(describeQuestionCount({ type: 'continent', continent: 'Africa' }, ALL_QUESTIONS), 'All 54');
+  assert.equal(describeQuestionCount({ type: 'continent', continent: 'Africa' }, 15), '15');
+});
+
+test('the server accepts "all" and a 5-second limit, and rejects nonsense', () => {
+  const selection = { type: 'continent', continent: 'Europe' };
+  assert.equal(
+    normalizeSettings({ selection, questionCount: ALL_QUESTIONS, timeLimitSeconds: 5 }).settings
+      .questionCount,
+    ALL_QUESTIONS,
+  );
+  assert.equal(
+    normalizeSettings({ selection, timeLimitSeconds: 5 }).settings.timeLimitSeconds,
+    5,
+  );
+  // Anything not on the menu falls back to the default rather than being trusted.
+  assert.equal(normalizeSettings({ selection, questionCount: 9999 }).settings.questionCount, 15);
+  assert.equal(normalizeSettings({ selection, timeLimitSeconds: 1 }).settings.timeLimitSeconds, 15);
+  assert.ok(QUESTION_COUNTS.includes(ALL_QUESTIONS));
+  assert.deepEqual(TIME_LIMITS, [5, 10, 15, 20, 30]);
 });
 
 test('mixed direction produces both kinds of question', () => {

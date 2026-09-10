@@ -3,11 +3,13 @@
 Test your knowledge of the world's countries and capitals — solo, or head-to-head
 against a friend in real time.
 
-- **Solo mode** — pick a continent (or build a custom set), answer, and get a full
-  breakdown: score, accuracy, time taken, and every question with your answer next
-  to the right one.
+- **Solo mode** — pick a continent (or build a custom set), choose 10/15/20
+  questions or **All** (one per country in the set, no repeats), answer, and get a
+  full breakdown: score, accuracy, time taken, and every question with your answer
+  next to the right one.
 - **Multiplayer** — create a room, share a 5-character code, and race someone
-  question by question. Both correct? The faster answer takes the point.
+  question by question, from 5 to 30 seconds each. Both correct? The faster answer
+  takes the point.
 - Works on a phone, remembers your name, has light and dark modes, and never
   signals right/wrong with colour alone.
 
