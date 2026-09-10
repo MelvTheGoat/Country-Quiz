@@ -1,0 +1,27 @@
+{
+  "name": "capitals-quiz",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Capitals Quiz — solo and real-time head-to-head country/capital quiz.",
+  "type": "module",
+  "workspaces": [
+    "shared",
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev": "concurrently -n server,client -c cyan,magenta \"npm:dev:server\" \"npm:dev:client\"",
+    "dev:server": "npm run dev --workspace @capitals-quiz/server",
+    "dev:client": "npm run dev --workspace @capitals-quiz/client",
+    "build": "npm run build --workspace @capitals-quiz/client",
+    "start": "npm run start --workspace @capitals-quiz/server",
+    "preview": "npm run preview --workspace @capitals-quiz/client",
+    "test": "npm test --workspace @capitals-quiz/shared --workspace @capitals-quiz/server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
