@@ -1,4 +1,4 @@
-# 🌍 Capitals Quiz
+#  Capitals Quiz
 
 Test your knowledge of the world's countries and capitals — solo, or head-to-head
 against a friend in real time.
